@@ -6,6 +6,7 @@
 // =============================================================
 var express = require("express");
 var bodyParser = require("body-parser");
+var mongoose = require("mongoose");
 
 // Sets up the Express App
 // =============================================================
@@ -19,9 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // parse application/json
 app.use(bodyParser.json());
 
-// parse application/json
-app.use(bodyParser.json());
-
 // Set Handlebars.
 var exphbs = require("express-handlebars");
 
@@ -30,6 +28,20 @@ app.set("view engine", "handlebars");
 
 // Static directory
 app.use(express.static("public"));
+
+//Start Mongoose
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/SlashScrapeDB";
+
+// Set mongoose to leverage built in JavaScript ES6 Promises
+// Connect to the Mongo DB
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
+
+// Models
+// =============================================================
+var db = require("./models");
 
 // Routes
 // =============================================================

@@ -10,7 +10,7 @@
 					<a class="nav-link" href="/favorites">Saved</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="#">Scrape</a>
+					<button class="btn btn-outline-secondary my-2 my-sm-0 scrape" id="scrape">Scrape</button>
 				</li>
 			</ul>
 			<form class="form-inline my-2 my-lg-0" id="search-form">
@@ -28,8 +28,11 @@
 		</div>
 		</div>
 		<div class="story-inner-div" id={{id}}>
+			{{preview}}
+			<span id="button-span">
 		{{#if saved}}<button class="btn btn-outline-secondary my-2 my-sm-0 unfavorite" id={{id}}>Unfavorite</button>{{/if}}
 		{{#unless saved}}<button class="btn btn-outline-secondary my-2 my-sm-0 favorite" id={{id}}>Favorite</button>{{/unless}}
+		</span>
 		</div>
 		</div>
 		{{/each}}
