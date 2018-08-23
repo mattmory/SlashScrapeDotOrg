@@ -19,8 +19,14 @@ var StorySchema = new mongoose.Schema({
   scraptedAt: {
     type: Date,
     default: Date.now
+  },
+  comment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Comment"
   }
 });
+
+StorySchema.index({title: 'text', preview: 'text'});
 var Story = mongoose.model("Story", StorySchema);
 
 

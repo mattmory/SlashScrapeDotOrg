@@ -5,11 +5,11 @@ $(function () {
         // Send the PUT request.
         $.ajax("/favorites/" + id, {
             type: "PUT",
-            data: {fav: true}
+            data: { fav: true }
         }).then(
             function () {
                 // Reload the page to get the updated list
-               location.reload();
+                location.reload();
             }
         );
 
@@ -21,7 +21,7 @@ $(function () {
         // Send the PUT request.
         $.ajax("/favorites/" + id, {
             type: "PUT",
-            data: {fav: false}
+            data: { fav: false }
         }).then(
             function () {
                 // Reload the page to get the updated list
@@ -44,4 +44,16 @@ $(function () {
         );
 
     });
+
+    $("#search-form").on("submit", function (event) {
+        event.preventDefault();
+        var searchInput = $("#search-input").val().trim();
+        if (searchInput !== null && searchInput !== "") {
+            $(location).attr("href", "/search/" + searchInput);
+        }
+        else {
+            alert("Search input cannot be blank.")
+        }
+
+    })
 });

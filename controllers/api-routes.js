@@ -52,25 +52,25 @@ module.exports = function (app) {
 
   app.get("/search/:search", function (req, res) {
     var regex = new RegExp(req.params.search, "i");
-    var searchQuery = db.Story.find({ title: regex });
     var storiesArray = [];
-    searchQuery.exec(function (err, docs) {
-      if (err) {
-        console.log(err);
-      }
-      else {
+    db.Story.find({ $text: { $search: regex } })
+      .then(function (docs) {
+
         docs.forEach(function (story) {
           storiesArray.push({ id: story.id, title: story.title, link: story.link, preview: story.preview, saved: story.saved })
         });
-      }
-      if (storiesArray.length > 0) {
-        var stories = { stories: JSON.parse(JSON.stringify(storiesArray)) };
-        res.render("index", stories);
-      }
-      else {
-        res.render("noresults");
-      }
-    });
+
+        if (storiesArray.length > 0) {
+          var stories = { stories: JSON.parse(JSON.stringify(storiesArray)) };
+          res.render("index", stories);
+        }
+        else {
+          res.render("noresults");
+        }
+      })
+      .catch (function (err) {
+        console.log(err);
+      });
   });
 
   // Route to scrape it all
@@ -112,47 +112,30 @@ module.exports = function (app) {
     var updateSaved = req.body.fav;
     db.Story.updateOne({ id: [req.params.id] }, { $set: { saved: updateSaved } }, { new: true })
       .then(function (docs) {
-        console.log(docs);
         res.status(200).end();
       }).catch(function (err) {
         throw err;
       })
   });
 
+
+  app.post("/Story/:id", function (req, res) {
+    // Create a new note and pass the req.body to the entry
+    db.Comment.create(req.body)
+      .then(function (dbComment) {
+        // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
+        // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+        // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+        return db.Story.findOneAndUpdate({ id: req.params.id }, { comment: dbComment._id }, { new: true });
+      })
+      .then(function (dbStory) {
+        // If we were able to successfully update an Article, send it back to the client
+        res.json(dbStory);
+      })
+      .catch(function (err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
+  });
 };
 
-// Route to remove a favorite
-
-// app.get("/scrape", function (req, res) {
-//   var newStories = 0;
-//   axios("http://www.slashdot.org")
-//     .then(function (response) {
-//       var $ = cheerio.load(response.data);
-//       $("span.story-title").each(function (i, element) {
-//         var link = "http:" + $(element).children().attr("href");
-//         var title = $(element).children().text();
-//         var id = $(element).attr("id");
-//         var divTextString = "div#text-" + id.substring(6, id.length);
-//         var storyPreview = $(divTextString).text();
-//         var findItemByID = storyItem.findOne({ id: id });
-//         findItemByID.exec(function (err, docs) {
-//           if (err) { console.log(err) }
-//           else {
-//             if (docs === null) {
-//               newStories++;
-//               var newStory = new storyItem({ id: [id], title: [title], link: [link], saved: false, preview: [storyPreview], comments: null });
-//               newStory.save(function (err, result) {
-//                 if (err) return console.error(err);
-//               });
-//             }
-//           }
-//         });
-//       });
-//     })
-//     .then(function () {
-//       res.send("Added "+ newStories + " new stories.");
-//     }).catch(function (err) {
-//       console.log(err);
-//     });
-
-// });
